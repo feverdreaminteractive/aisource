@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useUser, UserButton, SignInButton } from '@clerk/nextjs'
 import { Line, Bar, Doughnut } from 'react-chartjs-2'
 import {
@@ -58,12 +58,16 @@ export default function DashboardPage() {
   const [sites, setSites] = useState<any[]>([])
 
   useEffect(() => {
-    if (isLoaded && isSignedIn && user) {
-      loadUserData()
+    if (isLoaded) {
+      if (isSignedIn && user?.id) {
+        loadUserData()
+      } else {
+        setLoading(false)
+      }
     }
-  }, [isLoaded, isSignedIn, user])
+  }, [isLoaded, isSignedIn, user?.id, loadUserData])
 
-  async function loadUserData() {
+  const loadUserData = useCallback(async () => {
     try {
       setLoading(true)
 
@@ -95,7 +99,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user?.id, timeRange])
 
   if (!isLoaded || loading) {
     return (

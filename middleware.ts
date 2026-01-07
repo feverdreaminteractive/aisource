@@ -4,7 +4,8 @@ export default authMiddleware({
   publicRoutes: [
     '/',
     '/track.js',
-    '/api/track'
+    '/api/track',
+    '/test-data'
   ]
 });
 
