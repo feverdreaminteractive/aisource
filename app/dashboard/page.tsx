@@ -57,16 +57,6 @@ export default function DashboardPage() {
   const [analyticsData, setAnalyticsData] = useState(mockData)
   const [sites, setSites] = useState<any[]>([])
 
-  useEffect(() => {
-    if (isLoaded) {
-      if (isSignedIn && user?.id) {
-        loadUserData()
-      } else {
-        setLoading(false)
-      }
-    }
-  }, [isLoaded, isSignedIn, user?.id, loadUserData])
-
   const loadUserData = useCallback(async () => {
     try {
       setLoading(true)
@@ -100,6 +90,16 @@ export default function DashboardPage() {
       setLoading(false)
     }
   }, [user?.id, timeRange])
+
+  useEffect(() => {
+    if (isLoaded) {
+      if (isSignedIn && user?.id) {
+        loadUserData()
+      } else {
+        setLoading(false)
+      }
+    }
+  }, [isLoaded, isSignedIn, user?.id, loadUserData])
 
   if (!isLoaded || loading) {
     return (
