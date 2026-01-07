@@ -55,7 +55,7 @@ export default function DashboardPage() {
   const [timeRange, setTimeRange] = useState('7d')
   const [loading, setLoading] = useState(true)
   const [analyticsData, setAnalyticsData] = useState(mockData)
-  const [sites, setSites] = useState([])
+  const [sites, setSites] = useState<any[]>([])
 
   useEffect(() => {
     if (isLoaded && isSignedIn && user) {
@@ -66,6 +66,13 @@ export default function DashboardPage() {
   async function loadUserData() {
     try {
       setLoading(true)
+
+      if (!user?.id) {
+        console.log('DEBUG: No user ID available')
+        setLoading(false)
+        return
+      }
+
       console.log('DEBUG: Loading user data for user ID:', user.id)
 
       const userSites = await getUserSites(user.id)
@@ -80,7 +87,7 @@ export default function DashboardPage() {
           setAnalyticsData(data)
         }
       } else {
-        console.log('DEBUG: No sites found, using mock data')
+        console.log('DEBUG: No sites found, using empty data')
         setAnalyticsData({ totalViews: 0, aiViews: 0, topAiSources: [], topPages: [] })
       }
     } catch (error) {
