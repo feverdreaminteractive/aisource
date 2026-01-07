@@ -74,8 +74,10 @@ export default function DashboardPage() {
       setSites(userSites)
 
       if (userSites.length > 0) {
-        console.log('DEBUG: Using site for analytics:', userSites[0].id)
-        const data = await getAnalyticsData(userSites[0].id, timeRange)
+        // Use the site with tracking events (site_xnurtj0yv4f_mk4i6uvk) or the most recent site
+        const targetSite = userSites.find(site => site.id === 'site_xnurtj0yv4f_mk4i6uvk') || userSites[userSites.length - 1]
+        console.log('DEBUG: Using site for analytics:', targetSite.id)
+        const data = await getAnalyticsData(targetSite.id, timeRange)
         console.log('DEBUG: Analytics data:', data)
         if (data) {
           setAnalyticsData(data)
