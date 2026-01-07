@@ -66,14 +66,22 @@ export default function DashboardPage() {
   async function loadUserData() {
     try {
       setLoading(true)
+      console.log('DEBUG: Loading user data for user ID:', user.id)
+
       const userSites = await getUserSites(user.id)
+      console.log('DEBUG: User sites found:', userSites)
       setSites(userSites)
 
       if (userSites.length > 0) {
+        console.log('DEBUG: Using site for analytics:', userSites[0].id)
         const data = await getAnalyticsData(userSites[0].id, timeRange)
+        console.log('DEBUG: Analytics data:', data)
         if (data) {
           setAnalyticsData(data)
         }
+      } else {
+        console.log('DEBUG: No sites found, using mock data')
+        setAnalyticsData({ totalViews: 0, aiViews: 0, topAiSources: [], topPages: [] })
       }
     } catch (error) {
       console.error('Error loading user data:', error)
