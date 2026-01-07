@@ -4,20 +4,10 @@ import { createClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-console.log('Environment check:', {
-  NEXT_PUBLIC_SUPABASE_URL: supabaseUrl ? 'SET' : 'MISSING',
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: supabaseKey ? 'SET' : 'MISSING',
-  availableVars: Object.keys(process.env).filter(key => key.includes('SUPABASE'))
-})
-
-if (!supabaseUrl || !supabaseKey) {
-  throw new Error(`Missing Supabase environment variables. URL: ${supabaseUrl}, Key: ${supabaseKey ? 'SET' : 'MISSING'}`)
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export async function GET(request: NextRequest) {
   try {
