@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useUser, UserButton, SignInButton } from '@clerk/nextjs'
 import { Line, Bar, Doughnut } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -15,6 +16,7 @@ import {
   Legend,
   Filler
 } from 'chart.js'
+import { getAnalyticsData, getUserSites } from '../../lib/supabase'
 
 ChartJS.register(
   CategoryScale,
@@ -49,10 +51,65 @@ const mockData = {
 }
 
 export default function DashboardPage() {
+  const { isLoaded, isSignedIn, user } = useUser()
   const [timeRange, setTimeRange] = useState('7d')
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [analyticsData, setAnalyticsData] = useState(mockData)
+  const [sites, setSites] = useState([])
 
-  const aiTrafficPercentage = Math.round((mockData.aiViews / mockData.totalViews) * 100)
+  useEffect(() => {
+    if (isLoaded && isSignedIn && user) {
+      loadUserData()
+    }
+  }, [isLoaded, isSignedIn, user])
+
+  async function loadUserData() {
+    try {
+      setLoading(true)
+      const userSites = await getUserSites(user.id)
+      setSites(userSites)
+
+      if (userSites.length > 0) {
+        const data = await getAnalyticsData(userSites[0].id, timeRange)
+        if (data) {
+          setAnalyticsData(data)
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (!isLoaded || loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Welcome to AISource</h1>
+          <p className="text-gray-600 mb-8">Track AI traffic that Google Analytics misses</p>
+          <SignInButton mode="modal">
+            <button className="bg-blue-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-700 transition">
+              Sign In to Continue
+            </button>
+          </SignInButton>
+        </div>
+      </div>
+    )
+  }
+
+  const aiTrafficPercentage = Math.round((analyticsData.aiViews / analyticsData.totalViews) * 100) || 0
 
   const timeSeriesData = {
     labels: ['Jan 1', 'Jan 2', 'Jan 3', 'Jan 4', 'Jan 5', 'Jan 6', 'Jan 7'],
@@ -77,9 +134,9 @@ export default function DashboardPage() {
   }
 
   const sourceDistribution = {
-    labels: mockData.topAiSources.map(s => s.name),
+    labels: analyticsData.topAiSources.map(s => s.name),
     datasets: [{
-      data: mockData.topAiSources.map(s => s.views),
+      data: analyticsData.topAiSources.map(s => s.views),
       backgroundColor: [
         '#10b981',
         '#8b5cf6',
@@ -97,7 +154,9 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-gray-900">AI Traffic Analytics</h1>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-4">
+              <UserButton afterSignOutUrl="/" />
+              <div className="flex gap-2">
               {['24h', '7d', '30d', '90d'].map((range) => (
                 <button
                   key={range}
@@ -111,6 +170,7 @@ export default function DashboardPage() {
                   {range}
                 </button>
               ))}
+              </div>
             </div>
           </div>
         </div>
@@ -120,13 +180,13 @@ export default function DashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="text-sm font-medium text-gray-500 mb-1">Total Page Views</div>
-            <div className="text-3xl font-bold text-gray-900">{mockData.totalViews.toLocaleString()}</div>
+            <div className="text-3xl font-bold text-gray-900">{analyticsData.totalViews.toLocaleString()}</div>
             <div className="text-sm text-green-600 mt-1">+12% vs last period</div>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="text-sm font-medium text-gray-500 mb-1">AI Traffic</div>
-            <div className="text-3xl font-bold text-purple-600">{mockData.aiViews.toLocaleString()}</div>
+            <div className="text-3xl font-bold text-purple-600">{analyticsData.aiViews.toLocaleString()}</div>
             <div className="text-sm text-green-600 mt-1">+28% vs last period</div>
           </div>
 
@@ -138,8 +198,8 @@ export default function DashboardPage() {
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <div className="text-sm font-medium text-gray-500 mb-1">Top AI Source</div>
-            <div className="text-3xl font-bold text-green-600">ChatGPT</div>
-            <div className="text-sm text-gray-600 mt-1">{mockData.topAiSources[0].views} views</div>
+            <div className="text-3xl font-bold text-green-600">{analyticsData.topAiSources[0]?.name || 'No Data'}</div>
+            <div className="text-sm text-gray-600 mt-1">{analyticsData.topAiSources[0]?.views || 0} views</div>
           </div>
         </div>
 
@@ -198,7 +258,7 @@ export default function DashboardPage() {
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <h2 className="text-lg font-semibold mb-4">Top AI Sources</h2>
             <div className="space-y-4">
-              {mockData.topAiSources.map((source, index) => (
+              {analyticsData.topAiSources.map((source, index) => (
                 <div key={source.name} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
                     <div className={`w-3 h-3 rounded-full`} style={{ backgroundColor: sourceDistribution.datasets[0].backgroundColor[index] }}></div>
@@ -218,7 +278,7 @@ export default function DashboardPage() {
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <h2 className="text-lg font-semibold mb-4">Top Pages by AI Traffic</h2>
             <div className="space-y-4">
-              {mockData.topPages.map((page, index) => (
+              {analyticsData.topPages.map((page, index) => (
                 <div key={page.path} className="p-3 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm mb-1">{page.path}</div>
                   <div className="flex justify-between text-sm text-gray-600">
