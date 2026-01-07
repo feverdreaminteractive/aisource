@@ -1,13 +1,31 @@
-# AISource - AI Traffic Analytics
+# 🚨 AISource - COMMERCIAL SOFTWARE - LICENSE REQUIRED
 
-Track traffic from AI sources like ChatGPT, Claude, Perplexity, and more with a lightweight analytics tool.
+**© 2026 Fever Dream Interactive. All rights reserved.**
 
-## 🚀 Quick Start
+⚠️ **THIS IS PROPRIETARY COMMERCIAL SOFTWARE** ⚠️
+
+**You must purchase a license to use this software. Unauthorized use is prohibited and will result in legal action.**
+
+Track traffic from AI sources like ChatGPT, Claude, Perplexity, and more with a professional analytics platform.
+
+## 💰 LICENSING REQUIRED
+
+**Before using this software, you MUST purchase a license:**
+
+| License Type | Price | Usage |
+|--------------|-------|-------|
+| **Individual** | $297/year | Single developer, personal projects |
+| **Startup** | $997/year | Small businesses (<10 employees) |
+| **Enterprise** | $2,997/year | Unlimited developers & commercial use |
+
+**Contact: licensing@feverdreaminteractive.com**
+
+## 🚀 Quick Start (Licensed Users Only)
 
 Add one script tag to your website:
 
 ```html
-<script src="https://your-domain.com/track.js" data-site="your-site-id"></script>
+<script src="https://your-licensed-domain.com/track.js" data-site="your-site-id"></script>
 ```
 
 That's it! Start seeing your AI traffic in the dashboard.
@@ -206,7 +224,9 @@ See `lib/database.sql` for complete schema.
 
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details.
+**COMMERCIAL LICENSE REQUIRED** - See [LICENSE](LICENSE) and [COPYRIGHT.md](COPYRIGHT.md) for details.
+
+⚠️ **This is NOT open source software. Commercial license required for any use.**
 
 ## 🔗 Links
 

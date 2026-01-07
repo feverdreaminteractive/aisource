@@ -1,7 +1,8 @@
 {
   "name": "aisource",
   "version": "1.0.0",
-  "description": "Track traffic from AI sources like ChatGPT, Claude, Perplexity",
+  "description": "COMMERCIAL SOFTWARE - AI Traffic Analytics Platform (License Required)",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
@@ -30,7 +31,11 @@
     "autoprefixer": "^10.4.0",
     "postcss": "^8.4.0"
   },
-  "keywords": ["analytics", "ai", "tracking", "referrals", "chatgpt", "claude"],
-  "author": "",
-  "license": "MIT"
+  "keywords": ["commercial", "analytics", "ai", "tracking", "paid", "enterprise"],
+  "author": "Fever Dream Interactive",
+  "license": "COMMERCIAL",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/feverdreaminteractive/aisource"
+  }
 }
