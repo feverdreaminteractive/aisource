@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useUser, UserButton, SignInButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Site } from '../../lib/types'
+import { getUserSites } from '../../lib/supabase'
 
 export default function SitesPage() {
   const { isLoaded, isSignedIn, user } = useUser()
@@ -25,25 +26,16 @@ export default function SitesPage() {
     try {
       setLoading(true)
       console.log('Loading sites...')
-      const response = await fetch('/api/sites')
 
-      console.log('Sites API response status:', response.status)
-
-      if (response.status === 401) {
-        // User not authenticated, but that's ok - they'll see the sign-in UI
+      if (!user?.id) {
+        console.log('No user ID available')
         setSites([])
         return
       }
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Sites API error:', errorText)
-        throw new Error(`Failed to load sites: ${response.status} ${errorText}`)
-      }
-
-      const data = await response.json()
-      console.log('Sites API response data:', data)
-      setSites(data.sites || [])
+      const userSites = await getUserSites(user.id)
+      console.log('Loaded sites:', userSites)
+      setSites(userSites || [])
     } catch (error) {
       console.error('Error loading sites:', error)
     } finally {
