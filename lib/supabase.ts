@@ -78,11 +78,49 @@ export async function getAnalyticsData(siteId: string, timeRange: string = '7d')
     .sort((a, b) => b.views - a.views)
     .slice(0, 5)
 
+  // Generate time series data
+  const dailyCounts: { [key: string]: { total: number, ai: number } } = {}
+
+  // Initialize all days in range with zero counts
+  for (let d = new Date(startDate); d <= now; d.setDate(d.getDate() + 1)) {
+    const dateKey = d.toISOString().split('T')[0]
+    dailyCounts[dateKey] = { total: 0, ai: 0 }
+  }
+
+  // Count events by day
+  totalEvents?.forEach(event => {
+    const dateKey = event.timestamp.split('T')[0]
+    if (dailyCounts[dateKey]) {
+      dailyCounts[dateKey].total++
+    }
+  })
+
+  aiEvents?.forEach(event => {
+    const dateKey = event.timestamp.split('T')[0]
+    if (dailyCounts[dateKey]) {
+      dailyCounts[dateKey].ai++
+    }
+  })
+
+  // Convert to arrays for chart
+  const sortedDates = Object.keys(dailyCounts).sort()
+  const timeSeriesLabels = sortedDates.map(date => {
+    const d = new Date(date)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  })
+  const timeSeriesTotal = sortedDates.map(date => dailyCounts[date].total)
+  const timeSeriesAI = sortedDates.map(date => dailyCounts[date].ai)
+
   return {
     totalViews,
     aiViews,
     topAiSources,
-    topPages
+    topPages,
+    timeSeries: {
+      labels: timeSeriesLabels,
+      totalData: timeSeriesTotal,
+      aiData: timeSeriesAI
+    }
   }
 }
 

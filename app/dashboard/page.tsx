@@ -127,11 +127,11 @@ export default function DashboardPage() {
   const aiTrafficPercentage = Math.round((analyticsData.aiViews / analyticsData.totalViews) * 100) || 0
 
   const timeSeriesData = {
-    labels: ['Jan 1', 'Jan 2', 'Jan 3', 'Jan 4', 'Jan 5', 'Jan 6', 'Jan 7'],
+    labels: analyticsData.timeSeries?.labels || [],
     datasets: [
       {
         label: 'Total Traffic',
-        data: [1200, 1400, 1100, 1800, 1600, 1900, 2100],
+        data: analyticsData.timeSeries?.totalData || [],
         borderColor: '#e5e7eb',
         backgroundColor: 'rgba(229, 231, 235, 0.1)',
         fill: true,
@@ -139,7 +139,7 @@ export default function DashboardPage() {
       },
       {
         label: 'AI Traffic',
-        data: [180, 210, 165, 290, 245, 320, 380],
+        data: analyticsData.timeSeries?.aiData || [],
         borderColor: '#8b5cf6',
         backgroundColor: 'rgba(139, 92, 246, 0.1)',
         fill: true,
