@@ -129,6 +129,7 @@ export async function getUserSites(userId: string) {
     .from('sites')
     .select('*')
     .eq('owner_id', userId)
+    .order('created_at', { ascending: false })
 
   if (error) {
     console.error('Error fetching user sites:', error)
