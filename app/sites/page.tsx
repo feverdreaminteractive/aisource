@@ -48,7 +48,7 @@ export default function SitesPage() {
 
     try {
       setAdding(true)
-      console.log('Adding site:', newSite)
+      console.log('Adding site directly to Supabase:', newSite)
 
       // Generate a unique site ID (same logic as API)
       const siteId = `site_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`
