@@ -49,6 +49,11 @@ export interface AnalyticsData {
     views: number
     aiViews: number
   }>
+  timeSeries?: {
+    labels: string[]
+    totalData: number[]
+    aiData: number[]
+  }
 }
 
 export interface CreateSiteRequest {
