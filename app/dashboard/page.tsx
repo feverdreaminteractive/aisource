@@ -32,22 +32,15 @@ ChartJS.register(
 )
 
 const mockData = {
-  totalViews: 12847,
-  aiViews: 2156,
-  topAiSources: [
-    { name: 'ChatGPT', views: 847, change: '+23%' },
-    { name: 'Claude', views: 562, change: '+15%' },
-    { name: 'Perplexity', views: 324, change: '+8%' },
-    { name: 'Gemini', views: 287, change: '-2%' },
-    { name: 'Copilot', views: 136, change: '+45%' }
-  ],
-  topPages: [
-    { path: '/blog/ai-trends-2024', views: 423, aiViews: 189 },
-    { path: '/products/ml-tools', views: 356, aiViews: 134 },
-    { path: '/docs/api-guide', views: 289, aiViews: 98 },
-    { path: '/blog/chatgpt-integration', views: 234, aiViews: 156 },
-    { path: '/pricing', views: 167, aiViews: 45 }
-  ]
+  totalViews: 0,
+  aiViews: 0,
+  topAiSources: [],
+  topPages: [],
+  timeSeries: {
+    labels: [],
+    totalData: [],
+    aiData: []
+  }
 }
 
 export default function DashboardPage() {
