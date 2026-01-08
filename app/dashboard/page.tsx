@@ -76,7 +76,7 @@ export default function DashboardPage() {
           aiViews: 0,
           topAiSources: [] as any[],
           topPages: [] as any[],
-          timeSeries: { labels: [], totalData: [], aiData: [] }
+          timeSeries: { labels: [] as string[], totalData: [] as number[], aiData: [] as number[] }
         }
 
         // Aggregate totals and collect all sources/pages
