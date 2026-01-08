@@ -72,7 +72,13 @@ export default function DashboardPage() {
 
         // Combine all the data
         const combinedData = allAnalyticsData.reduce((combined, siteData) => {
-          if (!siteData) return combined
+          if (!siteData || !combined) return combined || {
+            totalViews: 0,
+            aiViews: 0,
+            topAiSources: [],
+            topPages: [],
+            timeSeries: { labels: [], totalData: [], aiData: [] }
+          }
 
           return {
             totalViews: combined.totalViews + siteData.totalViews,
@@ -95,7 +101,7 @@ export default function DashboardPage() {
           topAiSources: [],
           topPages: [],
           timeSeries: { labels: [], totalData: [], aiData: [] }
-        })
+        } as AnalyticsData)
 
         // Process aggregated AI sources
         const aiSourceCounts: { [key: string]: number } = {}
