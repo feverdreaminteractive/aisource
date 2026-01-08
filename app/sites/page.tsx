@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useUser, UserButton, SignInButton } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Site } from '../../lib/types'
-import { getUserSites } from '../../lib/supabase'
+import { getUserSites, supabase } from '../../lib/supabase'
 
 export default function SitesPage() {
   const { isLoaded, isSignedIn, user } = useUser()
@@ -44,31 +44,37 @@ export default function SitesPage() {
   }
 
   async function addSite() {
-    if (!newSite.domain || !newSite.name) return
+    if (!newSite.domain || !newSite.name || !user?.id) return
 
     try {
       setAdding(true)
       console.log('Adding site:', newSite)
 
-      const response = await fetch('/api/sites', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newSite),
-      })
+      // Generate a unique site ID (same logic as API)
+      const siteId = `site_${Math.random().toString(36).substring(2)}_${Date.now().toString(36)}`
 
-      console.log('Add site API response status:', response.status)
-
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Add site API error:', errorText)
-        throw new Error(`Failed to add site: ${response.status} ${errorText}`)
+      const newSiteData = {
+        id: siteId,
+        domain: newSite.domain.replace(/^https?:\/\//, '').replace(/\/$/, ''), // Clean domain
+        name: newSite.name,
+        owner_id: user.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
       }
 
-      const data = await response.json()
-      console.log('Add site API response data:', data)
-      setSites([data.site, ...sites])
+      const { data: site, error } = await supabase
+        .from('sites')
+        .insert(newSiteData)
+        .select()
+        .single()
+
+      if (error) {
+        console.error('Database error:', error)
+        throw new Error(`Failed to create site: ${error.message}`)
+      }
+
+      console.log('Site created:', site)
+      setSites([site, ...sites])
       setNewSite({ domain: '', name: '' })
     } catch (error) {
       console.error('Error adding site:', error)
