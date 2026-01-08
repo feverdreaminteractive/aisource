@@ -71,37 +71,28 @@ export default function DashboardPage() {
         )
 
         // Combine all the data
-        const combinedData = allAnalyticsData.reduce((combined, siteData) => {
-          if (!siteData || !combined) return combined || {
-            totalViews: 0,
-            aiViews: 0,
-            topAiSources: [],
-            topPages: [],
-            timeSeries: { labels: [], totalData: [], aiData: [] }
-          }
-
-          return {
-            totalViews: combined.totalViews + siteData.totalViews,
-            aiViews: combined.aiViews + siteData.aiViews,
-            topAiSources: [...combined.topAiSources, ...siteData.topAiSources],
-            topPages: [...combined.topPages, ...siteData.topPages],
-            timeSeries: combined.timeSeries ? {
-              labels: siteData.timeSeries?.labels || [],
-              totalData: (combined.timeSeries.totalData || []).map((val, idx) =>
-                val + (siteData.timeSeries?.totalData[idx] || 0)
-              ),
-              aiData: (combined.timeSeries.aiData || []).map((val, idx) =>
-                val + (siteData.timeSeries?.aiData[idx] || 0)
-              )
-            } : siteData.timeSeries
-          }
-        }, {
+        let combinedData = {
           totalViews: 0,
           aiViews: 0,
-          topAiSources: [],
-          topPages: [],
+          topAiSources: [] as any[],
+          topPages: [] as any[],
           timeSeries: { labels: [], totalData: [], aiData: [] }
-        } as AnalyticsData)
+        }
+
+        // Aggregate totals and collect all sources/pages
+        allAnalyticsData.forEach(siteData => {
+          if (siteData) {
+            combinedData.totalViews += siteData.totalViews
+            combinedData.aiViews += siteData.aiViews
+            combinedData.topAiSources.push(...siteData.topAiSources)
+            combinedData.topPages.push(...siteData.topPages)
+
+            // Use the first site's time series data for the chart
+            if (!combinedData.timeSeries.labels.length && siteData.timeSeries) {
+              combinedData.timeSeries = siteData.timeSeries
+            }
+          }
+        })
 
         // Process aggregated AI sources
         const aiSourceCounts: { [key: string]: number } = {}
