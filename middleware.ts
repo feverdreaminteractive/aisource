@@ -5,6 +5,7 @@ export default authMiddleware({
   publicRoutes: [
     '/',
     '/dashboard', // Allow dashboard access (will show sign-in if not authenticated)
+    '/sites', // Allow sites page access (will show sign-in if not authenticated)
     '/test-data', // Test page for debugging
     '/sign-in(.*)', // Clerk sign-in pages
     '/sign-up(.*)', // Clerk sign-up pages

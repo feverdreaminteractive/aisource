@@ -29,6 +29,12 @@ export default function SitesPage() {
 
       console.log('Sites API response status:', response.status)
 
+      if (response.status === 401) {
+        // User not authenticated, but that's ok - they'll see the sign-in UI
+        setSites([])
+        return
+      }
+
       if (!response.ok) {
         const errorText = await response.text()
         console.error('Sites API error:', errorText)
