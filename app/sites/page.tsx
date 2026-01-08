@@ -24,13 +24,19 @@ export default function SitesPage() {
   async function loadSites() {
     try {
       setLoading(true)
+      console.log('Loading sites...')
       const response = await fetch('/api/sites')
 
+      console.log('Sites API response status:', response.status)
+
       if (!response.ok) {
-        throw new Error('Failed to load sites')
+        const errorText = await response.text()
+        console.error('Sites API error:', errorText)
+        throw new Error(`Failed to load sites: ${response.status} ${errorText}`)
       }
 
       const data = await response.json()
+      console.log('Sites API response data:', data)
       setSites(data.sites || [])
     } catch (error) {
       console.error('Error loading sites:', error)
@@ -44,6 +50,8 @@ export default function SitesPage() {
 
     try {
       setAdding(true)
+      console.log('Adding site:', newSite)
+
       const response = await fetch('/api/sites', {
         method: 'POST',
         headers: {
@@ -52,15 +60,21 @@ export default function SitesPage() {
         body: JSON.stringify(newSite),
       })
 
+      console.log('Add site API response status:', response.status)
+
       if (!response.ok) {
-        throw new Error('Failed to add site')
+        const errorText = await response.text()
+        console.error('Add site API error:', errorText)
+        throw new Error(`Failed to add site: ${response.status} ${errorText}`)
       }
 
       const data = await response.json()
+      console.log('Add site API response data:', data)
       setSites([data.site, ...sites])
       setNewSite({ domain: '', name: '' })
     } catch (error) {
       console.error('Error adding site:', error)
+      alert(`Error adding site: ${error.message}`)
     } finally {
       setAdding(false)
     }
