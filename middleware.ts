@@ -6,6 +6,8 @@ export default authMiddleware({
     '/',
     '/dashboard', // Allow dashboard access (will show sign-in if not authenticated)
     '/test-data', // Test page for debugging
+    '/sign-in(.*)', // Clerk sign-in pages
+    '/sign-up(.*)', // Clerk sign-up pages
   ],
   // Routes that bypass middleware completely (for tracking)
   ignoredRoutes: [
@@ -17,9 +19,7 @@ export default authMiddleware({
 
 export const config = {
   matcher: [
-    // Match all routes except static files and Next.js internals
-    '/((?!.*\\..*|_next).*)',
-    '/',
+    '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
     '/(api|trpc)(.*)'
   ],
 };
