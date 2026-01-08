@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useUser, UserButton, SignInButton } from '@clerk/nextjs'
+import Link from 'next/link'
 import { Line, Bar, Doughnut } from 'react-chartjs-2'
 import {
   Chart as ChartJS,
@@ -168,7 +169,15 @@ export default function DashboardPage() {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-gray-900">AI Traffic Analytics</h1>
+            <div className="flex items-center gap-6">
+              <h1 className="text-2xl font-bold text-gray-900">AI Traffic Analytics</h1>
+              <Link
+                href="/sites"
+                className="text-blue-600 hover:text-blue-700 font-medium"
+              >
+                Manage Sites
+              </Link>
+            </div>
             <div className="flex items-center gap-4">
               <UserButton afterSignOutUrl="/" />
               <div className="flex gap-2">
@@ -293,7 +302,7 @@ export default function DashboardPage() {
           <div className="bg-white p-6 rounded-xl shadow-sm border">
             <h2 className="text-lg font-semibold mb-4">Top Pages by AI Traffic</h2>
             <div className="space-y-4">
-              {analyticsData.topPages.map((page, index) => (
+              {analyticsData.topPages.map((page) => (
                 <div key={page.path} className="p-3 bg-gray-50 rounded-lg">
                   <div className="font-medium text-sm mb-1">{page.path}</div>
                   <div className="flex justify-between text-sm text-gray-600">
