@@ -246,6 +246,24 @@ export default function SitesPage() {
             </ul>
           </div>
         )}
+
+        {/* Legal Information */}
+        <div className="mt-8 bg-gray-50 p-6 rounded-xl">
+          <div className="text-center space-y-4">
+            <div className="text-sm text-gray-600">
+              © {new Date().getFullYear()} AISource. All rights reserved.
+            </div>
+            <div className="flex justify-center space-x-6 text-sm">
+              <button className="text-gray-600 hover:text-gray-900">Privacy Policy</button>
+              <button className="text-gray-600 hover:text-gray-900">Terms of Service</button>
+              <button className="text-gray-600 hover:text-gray-900">Contact</button>
+            </div>
+            <div className="text-xs text-gray-500 max-w-2xl mx-auto">
+              Track AI traffic that Google Analytics misses. Monitor referrals from ChatGPT, Claude, and other AI tools.
+              By using this service, you agree to our data collection practices for analytics purposes.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   )

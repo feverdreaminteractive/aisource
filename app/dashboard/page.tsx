@@ -65,8 +65,8 @@ export default function DashboardPage() {
       setSites(userSites)
 
       if (userSites.length > 0) {
-        // Use the site with actual tracking data or fall back to most recent site
-        const targetSite = userSites.find(site => site.id === 'site_xnurtj0yv4f_mk4i6uvk') || userSites[userSites.length - 1]
+        // Use the most recent site for analytics
+        const targetSite = userSites[0]
         const data = await getAnalyticsData(targetSite.id, timeRange)
         if (data) {
           setAnalyticsData(data)
@@ -125,21 +125,12 @@ export default function DashboardPage() {
     )
   }
 
-  const aiTrafficPercentage = Math.round((analyticsData.aiViews / analyticsData.totalViews) * 100) || 0
 
   const timeSeriesData = {
     labels: analyticsData.timeSeries?.labels || [],
     datasets: [
       {
-        label: 'Total Traffic',
-        data: analyticsData.timeSeries?.totalData || [],
-        borderColor: '#e5e7eb',
-        backgroundColor: 'rgba(229, 231, 235, 0.1)',
-        fill: true,
-        tension: 0.4
-      },
-      {
-        label: 'AI Traffic',
+        label: 'AI Referrals',
         data: analyticsData.timeSeries?.aiData || [],
         borderColor: '#8b5cf6',
         backgroundColor: 'rgba(139, 92, 246, 0.1)',
@@ -170,7 +161,7 @@ export default function DashboardPage() {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-6">
-              <h1 className="text-2xl font-bold text-gray-900">AI Traffic Analytics</h1>
+              <h1 className="text-2xl font-bold text-gray-900">AI Referral Analytics</h1>
               <Link
                 href="/sites"
                 className="text-blue-600 hover:text-blue-700 font-medium"
@@ -201,35 +192,29 @@ export default function DashboardPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="text-sm font-medium text-gray-500 mb-1">Total Page Views</div>
-            <div className="text-3xl font-bold text-gray-900">{analyticsData.totalViews.toLocaleString()}</div>
-            <div className="text-sm text-green-600 mt-1">+12% vs last period</div>
-          </div>
-
-          <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="text-sm font-medium text-gray-500 mb-1">AI Traffic</div>
+            <div className="text-sm font-medium text-gray-500 mb-1">AI Referrals</div>
             <div className="text-3xl font-bold text-purple-600">{analyticsData.aiViews.toLocaleString()}</div>
             <div className="text-sm text-green-600 mt-1">+28% vs last period</div>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="text-sm font-medium text-gray-500 mb-1">AI Traffic %</div>
-            <div className="text-3xl font-bold text-blue-600">{aiTrafficPercentage}%</div>
-            <div className="text-sm text-green-600 mt-1">+3.2% vs last period</div>
+            <div className="text-sm font-medium text-gray-500 mb-1">Top AI Source</div>
+            <div className="text-3xl font-bold text-green-600">{analyticsData.topAiSources[0]?.name || 'No Data'}</div>
+            <div className="text-sm text-gray-600 mt-1">{analyticsData.topAiSources[0]?.views || 0} referrals</div>
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <div className="text-sm font-medium text-gray-500 mb-1">Top AI Source</div>
-            <div className="text-3xl font-bold text-green-600">{analyticsData.topAiSources[0]?.name || 'No Data'}</div>
-            <div className="text-sm text-gray-600 mt-1">{analyticsData.topAiSources[0]?.views || 0} views</div>
+            <div className="text-sm font-medium text-gray-500 mb-1">AI Sources</div>
+            <div className="text-3xl font-bold text-blue-600">{analyticsData.topAiSources.length}</div>
+            <div className="text-sm text-gray-600 mt-1">Active sources</div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
           <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border">
-            <h2 className="text-lg font-semibold mb-4">Traffic Over Time</h2>
+            <h2 className="text-lg font-semibold mb-4">AI Referrals Over Time</h2>
             <div className="h-80">
               <Line
                 data={timeSeriesData}
@@ -300,20 +285,17 @@ export default function DashboardPage() {
           </div>
 
           <div className="bg-white p-6 rounded-xl shadow-sm border">
-            <h2 className="text-lg font-semibold mb-4">Top Pages by AI Traffic</h2>
+            <h2 className="text-lg font-semibold mb-4">Top Pages by AI Referrals</h2>
             <div className="space-y-4">
               {analyticsData.topPages.map((page) => (
-                <div key={page.path} className="p-3 bg-gray-50 rounded-lg">
-                  <div className="font-medium text-sm mb-1">{page.path}</div>
-                  <div className="flex justify-between text-sm text-gray-600">
-                    <span>Total: {page.views}</span>
-                    <span className="text-purple-600 font-medium">AI: {page.aiViews}</span>
+                <div key={page.path} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-sm">{page.path}</div>
+                    <div className="text-xs text-gray-500 mt-1">Page URL</div>
                   </div>
-                  <div className="mt-2 bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-purple-500 h-2 rounded-full transition-all"
-                      style={{ width: `${(page.aiViews / page.views) * 100}%` }}
-                    ></div>
+                  <div className="text-right">
+                    <div className="text-lg font-semibold text-purple-600">{page.aiViews}</div>
+                    <div className="text-xs text-gray-500">AI referrals</div>
                   </div>
                 </div>
               ))}
@@ -321,16 +303,34 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <div className="mt-8 bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl">
-          <h2 className="text-lg font-semibold mb-2">Getting Started</h2>
-          <p className="text-gray-600 mb-4">Add the tracking script to your site to start collecting AI referral data:</p>
-          <div className="bg-white p-4 rounded-lg border font-mono text-sm text-gray-800">
-            {'<script src="https://aisource.vercel.app/track.js" data-site="demo-site-123"></script>'}
+        {sites.length > 0 && (
+          <div className="mt-8 bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-xl">
+            <h2 className="text-lg font-semibold mb-2">Currently Tracking</h2>
+            <div className="bg-white p-4 rounded-lg border">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-medium">{sites[0]?.name}</span>
+                <span className="text-sm text-gray-500">{sites[0]?.domain}</span>
+              </div>
+              <div className="text-xs text-gray-500">Site ID: {sites[0]?.id}</div>
+            </div>
+            <p className="text-sm text-gray-600 mt-2">
+              Analytics above show data for this site. <Link href="/sites" className="text-blue-600 hover:underline">Manage all sites</Link>
+            </p>
           </div>
-          <p className="text-sm text-gray-500 mt-2">
-            Replace "demo-site-123" with your unique site ID. Visit our setup guide for more details.
-          </p>
-        </div>
+        )}
+
+        {sites.length === 0 && (
+          <div className="mt-8 bg-gradient-to-r from-purple-50 to-blue-50 p-6 rounded-xl">
+            <h2 className="text-lg font-semibold mb-2">Getting Started</h2>
+            <p className="text-gray-600 mb-4">Add your first site to start tracking AI referral data:</p>
+            <Link
+              href="/sites"
+              className="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg font-medium hover:bg-blue-700 transition"
+            >
+              Add Your First Site
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   )
