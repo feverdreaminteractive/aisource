@@ -65,12 +65,69 @@ export default function DashboardPage() {
       setSites(userSites)
 
       if (userSites.length > 0) {
-        // Use the most recent site for analytics
-        const targetSite = userSites[0]
-        const data = await getAnalyticsData(targetSite.id, timeRange)
-        if (data) {
-          setAnalyticsData(data)
-        }
+        // Aggregate data from all user sites
+        const allAnalyticsData = await Promise.all(
+          userSites.map(site => getAnalyticsData(site.id, timeRange))
+        )
+
+        // Combine all the data
+        const combinedData = allAnalyticsData.reduce((combined, siteData) => {
+          if (!siteData) return combined
+
+          return {
+            totalViews: combined.totalViews + siteData.totalViews,
+            aiViews: combined.aiViews + siteData.aiViews,
+            topAiSources: [...combined.topAiSources, ...siteData.topAiSources],
+            topPages: [...combined.topPages, ...siteData.topPages],
+            timeSeries: combined.timeSeries ? {
+              labels: siteData.timeSeries?.labels || [],
+              totalData: (combined.timeSeries.totalData || []).map((val, idx) =>
+                val + (siteData.timeSeries?.totalData[idx] || 0)
+              ),
+              aiData: (combined.timeSeries.aiData || []).map((val, idx) =>
+                val + (siteData.timeSeries?.aiData[idx] || 0)
+              )
+            } : siteData.timeSeries
+          }
+        }, {
+          totalViews: 0,
+          aiViews: 0,
+          topAiSources: [],
+          topPages: [],
+          timeSeries: { labels: [], totalData: [], aiData: [] }
+        })
+
+        // Process aggregated AI sources
+        const aiSourceCounts: { [key: string]: number } = {}
+        combinedData.topAiSources.forEach(source => {
+          aiSourceCounts[source.name] = (aiSourceCounts[source.name] || 0) + source.views
+        })
+
+        const aggregatedAiSources = Object.entries(aiSourceCounts)
+          .map(([name, views]) => ({ name, views, change: '+0%' }))
+          .sort((a, b) => b.views - a.views)
+          .slice(0, 5)
+
+        // Process aggregated pages
+        const pageCounts: { [key: string]: { views: number, aiViews: number } } = {}
+        combinedData.topPages.forEach(page => {
+          if (!pageCounts[page.path]) {
+            pageCounts[page.path] = { views: 0, aiViews: 0 }
+          }
+          pageCounts[page.path].views += page.views
+          pageCounts[page.path].aiViews += page.aiViews
+        })
+
+        const aggregatedPages = Object.entries(pageCounts)
+          .map(([path, counts]) => ({ path, views: counts.views, aiViews: counts.aiViews }))
+          .sort((a, b) => b.aiViews - a.aiViews)
+          .slice(0, 5)
+
+        setAnalyticsData({
+          ...combinedData,
+          topAiSources: aggregatedAiSources,
+          topPages: aggregatedPages
+        })
       } else {
         // No sites found - show empty state
         setAnalyticsData({
@@ -305,16 +362,25 @@ export default function DashboardPage() {
 
         {sites.length > 0 && (
           <div className="mt-8 bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-xl">
-            <h2 className="text-lg font-semibold mb-2">Currently Tracking</h2>
-            <div className="bg-white p-4 rounded-lg border">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-medium">{sites[0]?.name}</span>
-                <span className="text-sm text-gray-500">{sites[0]?.domain}</span>
-              </div>
-              <div className="text-xs text-gray-500">Site ID: {sites[0]?.id}</div>
+            <h2 className="text-lg font-semibold mb-2">Currently Tracking ({sites.length} {sites.length === 1 ? 'site' : 'sites'})</h2>
+            <div className="space-y-2">
+              {sites.slice(0, 3).map(site => (
+                <div key={site.id} className="bg-white p-3 rounded-lg border flex justify-between items-center">
+                  <div>
+                    <span className="font-medium text-sm">{site.name}</span>
+                    <span className="text-xs text-gray-500 ml-2">{site.domain}</span>
+                  </div>
+                  <div className="text-xs text-gray-400">{site.id}</div>
+                </div>
+              ))}
+              {sites.length > 3 && (
+                <div className="text-sm text-gray-600 text-center pt-2">
+                  And {sites.length - 3} more sites
+                </div>
+              )}
             </div>
-            <p className="text-sm text-gray-600 mt-2">
-              Analytics above show data for this site. <Link href="/sites" className="text-blue-600 hover:underline">Manage all sites</Link>
+            <p className="text-sm text-gray-600 mt-3">
+              Analytics above show aggregated data from all your sites. <Link href="/sites" className="text-blue-600 hover:underline">Manage all sites</Link>
             </p>
           </div>
         )}
