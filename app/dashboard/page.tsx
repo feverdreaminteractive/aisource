@@ -51,6 +51,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(mockData)
   const [sites, setSites] = useState<any[]>([])
+  const [selectedSiteId, setSelectedSiteId] = useState<string>('all')
 
   const loadUserData = useCallback(async () => {
     try {
@@ -65,10 +66,11 @@ export default function DashboardPage() {
       setSites(userSites)
 
       if (userSites.length > 0) {
-        // Aggregate data from all user sites
-        const allAnalyticsData = await Promise.all(
-          userSites.map(site => getAnalyticsData(site.id, timeRange))
-        )
+        if (selectedSiteId === 'all') {
+          // Aggregate data from all user sites
+          const allAnalyticsData = await Promise.all(
+            userSites.map(site => getAnalyticsData(site.id, timeRange))
+          )
 
         // Combine all the data
         let combinedData = {
@@ -120,11 +122,18 @@ export default function DashboardPage() {
           .sort((a, b) => b.aiViews - a.aiViews)
           .slice(0, 5)
 
-        setAnalyticsData({
-          ...combinedData,
-          topAiSources: aggregatedAiSources,
-          topPages: aggregatedPages
-        })
+          setAnalyticsData({
+            ...combinedData,
+            topAiSources: aggregatedAiSources,
+            topPages: aggregatedPages
+          })
+        } else {
+          // Show data for selected individual site
+          const data = await getAnalyticsData(selectedSiteId, timeRange)
+          if (data) {
+            setAnalyticsData(data)
+          }
+        }
       } else {
         // No sites found - show empty state
         setAnalyticsData({
@@ -140,7 +149,7 @@ export default function DashboardPage() {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, timeRange])
+  }, [user?.id, timeRange, selectedSiteId])
 
   useEffect(() => {
     if (isLoaded) {
@@ -359,25 +368,35 @@ export default function DashboardPage() {
 
         {sites.length > 0 && (
           <div className="mt-8 bg-gradient-to-r from-blue-50 to-green-50 p-6 rounded-xl">
-            <h2 className="text-lg font-semibold mb-2">Currently Tracking ({sites.length} {sites.length === 1 ? 'site' : 'sites'})</h2>
-            <div className="space-y-2">
-              {sites.slice(0, 3).map(site => (
-                <div key={site.id} className="bg-white p-3 rounded-lg border flex justify-between items-center">
-                  <div>
-                    <span className="font-medium text-sm">{site.name}</span>
-                    <span className="text-xs text-gray-500 ml-2">{site.domain}</span>
-                  </div>
-                  <div className="text-xs text-gray-400">{site.id}</div>
-                </div>
-              ))}
-              {sites.length > 3 && (
-                <div className="text-sm text-gray-600 text-center pt-2">
-                  And {sites.length - 3} more sites
-                </div>
-              )}
+            <h2 className="text-lg font-semibold mb-4">Site Analytics</h2>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <label htmlFor="site-filter" className="text-sm font-medium text-gray-700">
+                  Viewing data for:
+                </label>
+                <select
+                  id="site-filter"
+                  value={selectedSiteId}
+                  onChange={(e) => setSelectedSiteId(e.target.value)}
+                  className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="all">All Sites ({sites.length})</option>
+                  {sites.map(site => (
+                    <option key={site.id} value={site.id}>
+                      {site.name} ({site.domain})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <Link href="/sites" className="text-blue-600 hover:underline text-sm">
+                Manage Sites
+              </Link>
             </div>
             <p className="text-sm text-gray-600 mt-3">
-              Analytics above show aggregated data from all your sites. <Link href="/sites" className="text-blue-600 hover:underline">Manage all sites</Link>
+              {selectedSiteId === 'all'
+                ? `Analytics above show aggregated data from all ${sites.length} sites.`
+                : `Analytics above show data for ${sites.find(s => s.id === selectedSiteId)?.name || 'selected site'}.`
+              }
             </p>
           </div>
         )}
