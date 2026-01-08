@@ -62,28 +62,22 @@ export default function DashboardPage() {
       setLoading(true)
 
       if (!user?.id) {
-        console.log('DEBUG: No user ID available')
         setLoading(false)
         return
       }
 
-      console.log('DEBUG: Loading user data for user ID:', user.id)
-
       const userSites = await getUserSites(user.id)
-      console.log('DEBUG: User sites found:', userSites)
       setSites(userSites)
 
       if (userSites.length > 0) {
-        // Use the site with tracking events (site_xnurtj0yv4f_mk4i6uvk) or the most recent site
+        // Use the site with actual tracking data or fall back to most recent site
         const targetSite = userSites.find(site => site.id === 'site_xnurtj0yv4f_mk4i6uvk') || userSites[userSites.length - 1]
-        console.log('DEBUG: Using site for analytics:', targetSite.id)
         const data = await getAnalyticsData(targetSite.id, timeRange)
-        console.log('DEBUG: Analytics data:', data)
         if (data) {
           setAnalyticsData(data)
         }
       } else {
-        console.log('DEBUG: No sites found, using empty data')
+        // No sites found - show empty state
         setAnalyticsData({ totalViews: 0, aiViews: 0, topAiSources: [], topPages: [] })
       }
     } catch (error) {
