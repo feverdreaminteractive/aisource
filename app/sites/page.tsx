@@ -74,7 +74,7 @@ export default function SitesPage() {
       setNewSite({ domain: '', name: '' })
     } catch (error) {
       console.error('Error adding site:', error)
-      alert(`Error adding site: ${error.message}`)
+      alert(`Error adding site: ${error instanceof Error ? error.message : 'Unknown error'}`)
     } finally {
       setAdding(false)
     }
