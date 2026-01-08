@@ -17,6 +17,7 @@ import {
   Filler
 } from 'chart.js'
 import { getAnalyticsData, getUserSites } from '../../lib/supabase'
+import { AnalyticsData } from '../../lib/types'
 
 ChartJS.register(
   CategoryScale,
@@ -47,7 +48,7 @@ export default function DashboardPage() {
   const { isLoaded, isSignedIn, user } = useUser()
   const [timeRange, setTimeRange] = useState('7d')
   const [loading, setLoading] = useState(true)
-  const [analyticsData, setAnalyticsData] = useState(mockData)
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(mockData)
   const [sites, setSites] = useState<any[]>([])
 
   const loadUserData = useCallback(async () => {
@@ -71,7 +72,13 @@ export default function DashboardPage() {
         }
       } else {
         // No sites found - show empty state
-        setAnalyticsData({ totalViews: 0, aiViews: 0, topAiSources: [], topPages: [] })
+        setAnalyticsData({
+          totalViews: 0,
+          aiViews: 0,
+          topAiSources: [],
+          topPages: [],
+          timeSeries: { labels: [], totalData: [], aiData: [] }
+        })
       }
     } catch (error) {
       console.error('Error loading user data:', error)
